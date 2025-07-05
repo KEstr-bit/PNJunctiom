@@ -1,4 +1,4 @@
-export default class Circle {
+export default class Particle {
   constructor(x, y, mass, charge, color, radius) {
     this.x = x;
     this.y = y;
@@ -18,6 +18,18 @@ export default class Circle {
   update(time)
   {
 
+  }
+
+    // Дополнительный метод для установки скорости
+  setVelocity(vx, vy) {
+    this.speedX = vx;
+    this.speedY = vy;
+  }
+
+  // Дополнительный метод для применения силы (F = ma)
+  applyForce(fx, fy) {
+    this.accelX += fx / this.mass;
+    this.accelY += fy / this.mass;
   }
 
 }
