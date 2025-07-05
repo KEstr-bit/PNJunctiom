@@ -22,6 +22,9 @@ export default class Electron extends Circle {
     this.speedX += this.accelX * time;
     this.speedY += this.accelY * time;
 
+    this.accelX = 0;
+    this.accelY = 0;
+
     // Обновляем позицию на основе скорости
     this.nextX = this.x + this.speedX * time;
     this.nextY = this.y + this.speedY * time;
