@@ -1,3 +1,5 @@
+import './Particle.css';
+
 export default class Particle {
   constructor(x, y, mass, charge, color, radius) {
     this.x = x;
@@ -18,6 +20,37 @@ export default class Particle {
   update(time)
   {
 
+  }
+
+  getCoords(){
+    const data = {x: this.x, y: this.y}
+    return data
+  }
+
+  getChargeSymbol() {
+    if (this.charge > 0) return '+';
+    if (this.charge < 0) return '-';
+    return ' ';
+  }
+
+  getDynamicStyles() {
+    return {
+      left: `${this.x - this.radius}px`,
+      top: `${this.y - this.radius}px`,
+      width: `${this.radius * 2}px`,
+      height: `${this.radius * 2}px`,
+      backgroundColor: this.color,
+      fontSize: `30px`, // Размер шрифта пропорционален радиусу
+      lineHeight: `2px`, // Центрирование текста по вертикали
+    };
+  }
+
+  render() {
+    return (
+      <div className="particle" style={this.getDynamicStyles()}>
+        {this.getChargeSymbol()}
+      </div>
+    );
   }
 
     // Дополнительный метод для установки скорости

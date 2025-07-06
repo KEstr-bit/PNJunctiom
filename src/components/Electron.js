@@ -1,6 +1,7 @@
 import { ELECTRON_CONFIG } from '../config.js';
+import Particle from './Particle';
 
-export default class Electron extends Circle {
+export class Electron extends Particle {
   constructor(x, y) {
     super(
       x, 

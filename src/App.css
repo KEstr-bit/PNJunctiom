@@ -1,5 +1,30 @@
 .App {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.recharts-text {
+  shape-rendering: crispEdges;
+  text-rendering: optimizeLegibility;
+}
+
+.recharts-cartesian-axis-tick-value {
+  paint-order: stroke;
+  stroke: white;
+  stroke-width: 2px;
+  stroke-linejoin: round;
+}
+
+.particle {
+  transition: transform 0.2s;
+}
+
+.particle:hover {
+  transform: scale(1.1);
+  cursor: pointer;
 }
 
 .App-logo {
