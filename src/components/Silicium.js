@@ -8,7 +8,6 @@ export class Silicium extends Atom {
         1,
         0, 
         'red',
-        10 , 
         onGenerateChargeCarrier
     );
 
@@ -20,7 +19,6 @@ update(time)
     
     this.chargeX = this.nextX;
     this.chargeY = this.nextY;
-    console.log(this.chargeX, this.chargeY)
     this.transferCharge();
 }
 
@@ -30,7 +28,7 @@ update(time)
 
     // Находим ближайший атом из соседей
     this.neighbors.forEach(neighbor => {
-        if (neighbor !== this && neighbor.canMove && neighbor.charge === 0) {
+        if (neighbor !== this && neighbor.canMove && neighbor.charge <= 0) {
             // Вычисляем расстояние до текущего соседа
             const dx = neighbor.x - this.chargeX;
             const dy = neighbor.y - this.chargeY;
@@ -43,21 +41,7 @@ update(time)
         }
     });
 
-    if(!closestAtom)
-    {
-        const dx = this.x - this.chargeX;
-            const dy = this.y - this.chargeY;
-            const distance = dx * dx + dy * dy; 
-            if(distance > this.radius * 2)
-            {
-                closestAtom = this.neighbors?.[Math.floor(Math.random()*this.neighbors.length - 1)]
-                if(closestAtom)
-                {
-                if (closestAtom.charge !== 0)
-                    closestAtom = null;
-            }
-            }
-    }
+
 
     // Если нашли подходящий атом, передаём заряд
     if (closestAtom) {

@@ -9,24 +9,36 @@ export class Indium extends Atom {
         1,
         0, 
         'purple',
-        10 , 
         onGenerateChargeCarrier
     );
 
     this.canMove = false;
   }
 
+setTemperature(temperature)
+  {
+    super.setTemperature(temperature);
+    if(temperature < 1)
+      this.canMove = true;
+    else
+      this.canMove = false;
+  }
+
+
 update(time)
 {
     super.update(time);
 
-    if(this.charge === 0 && probability(Math.sqrt(1)))
+    if(this.charge > 0)
+      this.charge = 0
+
+    if(this.charge === 0 && probability(1.67**(-1/this.temperature)))
     {
         let succes = false;
 
         let index = Math.floor(Math.random()*this.neighbors.length);
         const neighbor = this.neighbors[index]
-        console.log(this, this.neighbors, index)
+
         if(neighbor !== undefined)
         {
         if(neighbor.charge === 0 )

@@ -3,17 +3,17 @@ import { Electron } from './Electron';
 import Particle from './Particle';
 
 export class Atom extends Particle {
-  constructor(x, y, mass, charge, color, radius, onGenerateChargeCarrier) {
+  constructor(x, y, mass, charge, color, onGenerateChargeCarrier) {
     super(
         x, 
         y, 
         mass,
         charge, 
         color, 
-        radius
+        10
     );
 
-    this.onGenerateChargeCarrier = onGenerateChargeCarrier;
+    this.onGenerateChargeCarrier = (electron, atom) => onGenerateChargeCarrier(electron, this);
     this.baseX = x;
     this.baseY = y;
     this.chargeX = x;
@@ -26,6 +26,11 @@ export class Atom extends Particle {
    getCoords(){
     const data = {x: this.chargeX, y: this.chargeY}
     return data
+  }
+
+  setCoords(x, y){
+    this.chargeX = x;
+    this.chargeY = y;
   }
 
   // Метод для установки соседей
@@ -58,13 +63,18 @@ export class Atom extends Particle {
     if(this.canMove)
       this.move(time)
 
-    if(this.charge >= 0 && probability(Math.sqrt(this.temperature)))
+    if(this.radius !== 10)
+    {
+      this.radius = (this.radius + 10) / 2;
+    }
+
+    if(this.charge === 0 && probability(1.67**(-1/this.temperature)))
     {
     
       const angle = Math.random() * Math.PI * 2; // Случайный угол
       const electronX = this.x + Math.cos(angle) * this.radius * 2;
       const electronY = this.y + Math.sin(angle) * this.radius * 2;
-      this.onGenerateChargeCarrier(new Electron(electronX, electronY))
+      this.onGenerateChargeCarrier(new Electron(electronX, electronY,  Math.cos(angle)* 1000,  Math.sin(angle)* 1000), this)
     }
 
   }

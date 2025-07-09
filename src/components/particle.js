@@ -27,6 +27,11 @@ export default class Particle {
     return data
   }
 
+  setCoords(x, y){
+    this.x = x;
+    this.y = y;
+  }
+
   getChargeSymbol() {
     if (this.charge > 0) return '+';
     if (this.charge < 0) return '-';

@@ -2,7 +2,7 @@ import { ELECTRON_CONFIG } from '../config.js';
 import Particle from './Particle';
 
 export class Electron extends Particle {
-  constructor(x, y) {
+  constructor(x, y, speedX, speedY) {
     super(
       x, 
       y, 
@@ -11,6 +11,9 @@ export class Electron extends Particle {
       ELECTRON_CONFIG.DEFAULT_COLOR, 
       ELECTRON_CONFIG.RADIUS
     );
+
+    this.speedX = speedX || 0;
+    this.speedY = speedY || 0;
   }
 
   update(time) {

@@ -6,5 +6,5 @@ export const ELECTRON_CONFIG = {
 };
 
 export const PHYSICS_CONFIG = {
-  K: 100000, 
+  K: -1000000, 
 };

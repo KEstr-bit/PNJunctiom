@@ -24,12 +24,15 @@ class App extends React.Component {
       currentMeasurements: [],
       lastUpdateTime: 0,
       isRunning: true, // Добавлено состояние для паузы/старта
-      speedMultiplier: 1, // Множитель скорости
+      speedMultiplier: 1, // Множитель скоростиэ
+      averagedMeasurements: [],
+      measurementBuffer: [],
+      timeCounter: 0
     };
 
     this.lastUpdateTime = 0;
     this.updateInterval = 333;
-    this.graphUpdateInterval = 1000;
+    this.graphUpdateInterval = 3000;
     this.simulationEngine = new PNJunction(800,480,400);
   }
 
@@ -69,10 +72,6 @@ class App extends React.Component {
 
   // Метод для обновления типов атомов
   updateAtomTypes = () => {
-    this.simulationEngine.updateAtomTypes(
-      this.state.acceptorPercent,
-      this.state.donorPercent
-    );
     this.forceUpdate(); // Принудительное обновление для отображения изменений
   };
 
@@ -80,9 +79,7 @@ class App extends React.Component {
   toggleSimulation = () => {
     this.setState(prevState => ({
       isRunning: !prevState.isRunning
-    }), () => {
-      this.simulationEngine.setPaused(!this.state.isRunning);
-    });
+    }));
   };
 
   resetSimulation = () => {
@@ -97,7 +94,6 @@ class App extends React.Component {
     if (this.state.speedMultiplier < 8) {
       const newSpeed = this.state.speedMultiplier * 2;
       this.setState({ speedMultiplier: newSpeed });
-      this.simulationEngine.setSpeedMultiplier(newSpeed);
     }
   };
 
@@ -105,7 +101,6 @@ class App extends React.Component {
     if (this.state.speedMultiplier > 0.25) {
       const newSpeed = this.state.speedMultiplier / 2;
       this.setState({ speedMultiplier: newSpeed });
-      this.simulationEngine.setSpeedMultiplier(newSpeed);
     }
   };
 
@@ -130,21 +125,53 @@ class App extends React.Component {
   this.lastTimestamp = timestamp;
   
 
-
-  this.simulationEngine.update(deltaTime/1000);
+  if(this.state.isRunning)
+    this.simulationEngine.update(deltaTime/10000 * this.state.speedMultiplier);
   const updatedParticles = this.simulationEngine.getAllCircles();
   this.setState({ particles: updatedParticles });
   this.animationFrame = requestAnimationFrame(this.animate);
 };
 
-  takeMeasurement = () => {
-    const current = this.simulationEngine.getCurrent();
-    if (!isNaN(current) && isFinite(current)) {
-      this.setState(prevState => ({
-        currentMeasurements: [...prevState.currentMeasurements, current]
-      }));
-    }
-  };
+updateGraphData = () => {
+  // Ограничиваем количество точек на графике для производительности
+  if (this.state.currentMeasurements.length > 100) {
+    this.setState(prevState => ({
+      currentMeasurements: prevState.currentMeasurements.slice(-100)
+    }));
+  }
+};
+
+// Обновленные методы:
+takeMeasurement = () => {
+  const current = this.simulationEngine.getCurrent();
+  if (!isNaN(current)) {
+    this.setState(prevState => ({
+      measurementBuffer: [...prevState.measurementBuffer, current]
+    }));
+  }
+};
+
+updateGraphData = () => {
+  if (this.state.measurementBuffer.length > 0) {
+    const average = this.state.measurementBuffer.reduce((a, b) => a + b, 0) / 
+                   this.state.measurementBuffer.length;
+    
+    this.setState(prevState => {
+      const newTime = prevState.timeCounter + (this.graphUpdateInterval/1000);
+      return {
+        averagedMeasurements: [
+          ...prevState.averagedMeasurements,
+          {
+            time: newTime,
+            current: average
+          }
+        ].slice(-20), // храним только последние 20 точек (1 минута при обновлении раз в 3 секунды)
+        measurementBuffer: [],
+        timeCounter: newTime
+      };
+    });
+  }
+};
 
     
 render() {
@@ -425,8 +452,8 @@ render() {
                   </label>
                   <input
                     type="range"
-                    min="-1"
-                    max="1"
+                    min="-2"
+                    max="2"
                     step="0.1"
                     value={this.state.voltage}
                     onChange={this.handleVoltageChange}
@@ -461,51 +488,104 @@ render() {
               </h3>
               <div style={{ height: '250px' }}>
                 <ResponsiveContainer width="100%" height="100%">
+  <LineChart
+    data={this.state.averagedMeasurements}
+    margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+  >
+    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+    <XAxis 
+      dataKey="time"
+      label={{ value: 'Время (мин)', position: 'insideBottomRight', offset: -5 }}
+      tickFormatter={(time) => `${(time/60).toFixed(1)}`}
+    />
+    <YAxis
+      label={{ value: 'Ток (А)', angle: -90, position: 'insideLeft' }}
+      tickFormatter={(current) => current.toFixed(3)}
+    />
+    <Line 
+      type="linear"
+      dataKey="current"
+      stroke="#3498db"
+      strokeWidth={2}
+      dot={false}
+      isAnimationActive={false}
+    />
+  </LineChart>
+</ResponsiveContainer>
 
-                </ResponsiveContainer>
               </div>
             </div>
 
             <div style={{ 
-              backgroundColor: '#f5f5f5',
-              borderRadius: '8px',
-              padding: '15px',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-            }}>
-              <h3 style={{ 
-                marginTop: 0,
-                marginBottom: '15px',
-                color: '#444'
-              }}>
-                Состояние системы
-              </h3>
-              
-              <div style={{ 
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '10px',
-                fontSize: '14px'
-              }}>
-                <div>
-                  <div style={{ color: '#777' }}>Макс. электронов:</div>
-                  <div style={{ fontWeight: 'bold' }}>{this.state.maxElectrons}</div>
-                </div>
-                <div>
-                  <div style={{ color: '#777' }}>Текущих электронов:</div>
-                  <div style={{ fontWeight: 'bold' }}>
-                      {this.state.particles.filter(p => p instanceof Electron).length}
-                  </div>
-                </div>
-                <div>
-                  <div style={{ color: '#777' }}>Температура:</div>
-                  <div style={{ fontWeight: 'bold' }}>{this.state.temperature}°C</div>
-                </div>
-                <div>
-                  <div style={{ color: '#777' }}>Напряжение:</div>
-                  <div style={{ fontWeight: 'bold' }}>{this.state.voltage}В</div>
-                </div>
-              </div>
-            </div>
+  backgroundColor: '#f5f5f5',
+  borderRadius: '8px',
+  padding: '15px',
+  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+}}>
+  <h3 style={{ 
+    marginTop: 0,
+    marginBottom: '15px',
+    color: '#444'
+  }}>
+    Состояние системы
+  </h3>
+  
+  <div style={{ 
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '10px',
+    fontSize: '14px'
+  }}>
+    <div>
+      <div style={{ color: '#777' }}>Дырок в n-обл (+):</div>
+      <div style={{ fontWeight: 'bold' }}>
+        {this.simulationEngine.currentPositiveN.toFixed(2)}
+      </div>
+    </div>
+    <div>
+      <div style={{ color: '#777' }}>Электронов в n-обл (-):</div>
+      <div style={{ fontWeight: 'bold' }}>
+        {this.simulationEngine.currentNegativeN.toFixed(2)}
+      </div>
+    </div>
+    <div>
+      <div style={{ color: '#777' }}>Дырок в p-обл (+):</div>
+      <div style={{ fontWeight: 'bold' }}>
+        {this.simulationEngine.currentPositiveP.toFixed(2)}
+      </div>
+    </div>
+    <div>
+      <div style={{ color: '#777' }}>Электронов в p-обл (-):</div>
+      <div style={{ fontWeight: 'bold' }}>
+        {this.simulationEngine.currentNegativeP.toFixed(2)}
+      </div>
+    </div>
+    <div>
+      <div style={{ color: '#777' }}>Макс. n-область (+):</div>
+      <div style={{ fontWeight: 'bold' }}>
+        {this.simulationEngine.maxPositiveN.toFixed(2)}
+      </div>
+    </div>
+    <div>
+      <div style={{ color: '#777' }}>Макс. n-область (-):</div>
+      <div style={{ fontWeight: 'bold' }}>
+        {this.simulationEngine.maxNegativeN.toFixed(2)}
+      </div>
+    </div>
+    <div>
+      <div style={{ color: '#777' }}>Макс. p-область (+):</div>
+      <div style={{ fontWeight: 'bold' }}>
+        {this.simulationEngine.maxPositiveP.toFixed(2)}
+      </div>
+    </div>
+    <div>
+      <div style={{ color: '#777' }}>Макс. p-область (-):</div>
+      <div style={{ fontWeight: 'bold' }}>
+        {this.simulationEngine.maxNegativeP.toFixed(2)}
+      </div>
+    </div>
+  </div>
+</div>
 
             <div style={{ 
               backgroundColor: '#f5f5f5',
