@@ -22,7 +22,7 @@ update(time)
     this.transferCharge();
 }
 
-  transferCharge(time) {
+  transferCharge() {
     let closestAtom = null;
     let minDistance = Infinity;
 

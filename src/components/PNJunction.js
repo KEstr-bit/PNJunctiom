@@ -1,4 +1,9 @@
-import { PHYSICS_CONFIG } from "../config";
+
+import { 
+  PHYSICS_CONFIG, 
+  ELECTRON_CONFIG, 
+  SIMULATION_CONFIG 
+} from "../config";
 import { Electron } from './Electron';
 import  {Atom}  from './Atom';
 
@@ -225,8 +230,8 @@ checkRecombination()
 
 checkHighEnergyElectrons() {
   // Threshold for considering an electron "fast" (adjust as needed)
-  const SPEED_THRESHOLD = 1000;
-  const CREATION_DISTANCE = 40; // Distance in front to create new electron
+  const SPEED_THRESHOLD = ELECTRON_CONFIG.SPEED_THRESHOLD;
+  const CREATION_DISTANCE = ELECTRON_CONFIG.CREATION_DISTANCE;
   
   // Make a copy of current electrons array since we might modify it
   const currentElectrons = [...this.electrons];
@@ -245,6 +250,8 @@ checkHighEnergyElectrons() {
       
       // Check if position is within bounds
       if (newX > 0 && newX < this.width && newY > 0 && newY < this.height) {
+        if(probability(Math.sqrt(this.temperature)))
+        {
         const newElectron = new Electron(newX, newY);
         
         // Set similar velocity (with slight randomness)
@@ -256,6 +263,7 @@ checkHighEnergyElectrons() {
         // Reduce original electron's energy slightly
         electron.speedX *= 0.8;
         electron.speedY *= 0.8;
+        }
       }
     }
   });
@@ -497,10 +505,10 @@ setTemperature(temperature)
   this.temperature = temperature;
   this.atoms.forEach(atom => atom.setTemperature(temperature));
 
-  this.maxPositiveP = this.atoms.filter(atom => atom instanceof Indium).length*Math.sqrt(this.temperature) / 3;
-  this.maxNegativeN = this.atoms.filter(atom => atom instanceof Arsenicum).length*Math.sqrt(this.temperature) / 3;
-  this.maxPositiveN = Math.sqrt(this.temperature)/2;
-  this.maxNegativeP = Math.sqrt(this.temperature)/2;
+  this.maxPositiveP = ((3 * this.atoms.filter(atom => atom instanceof Indium).length + 19) * 7 * this.temperature)/(9*this.temperature +440);
+  this.maxNegativeN = ((3 * this.atoms.filter(atom => atom instanceof Arsenicum).length + 19) * 7 * this.temperature)/(9*this.temperature +440);
+  this.maxPositiveN = 0.0003125 * this.temperature**2 + 0.0625*this.temperature;
+  this.maxNegativeP = 0.0003125 * this.temperature**2 + 0.0625*this.temperature;
   
 }
 
@@ -521,9 +529,12 @@ reset()
   // Суммируем speedX всех электронов
   let sum = 0;
   this.electrons.forEach(electron=> {
-    sum += electron.charge * (electron.nextX - electron.x);
+    sum -= electron.charge * electron.speedX;
   })
-  return -sum;
+  this.atoms.forEach(electron=> {
+    sum -= electron.charge * electron.speedX;
+  })
+  return -sum/100;
 }
 
 }
