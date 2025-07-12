@@ -21,8 +21,8 @@ export class PNJunction {
     this.atoms = []; // массив частиц
     this.electrons = []
 
-    this.acceptorPercent = 5;
-    this.donorPercent = 5;
+    this.acceptorPercent = 0;
+    this.donorPercent = 0;
 
     this.maxParticles = 0;
     this.temperature = 0;
@@ -505,10 +505,10 @@ setTemperature(temperature)
   this.temperature = temperature;
   this.atoms.forEach(atom => atom.setTemperature(temperature));
 
-  this.maxPositiveP = ((3 * this.atoms.filter(atom => atom instanceof Indium).length + 19) * 7 * this.temperature)/(9*this.temperature +440);
-  this.maxNegativeN = ((3 * this.atoms.filter(atom => atom instanceof Arsenicum).length + 19) * 7 * this.temperature)/(9*this.temperature +440);
-  this.maxPositiveN = 0.0003125 * this.temperature**2 + 0.0625*this.temperature;
-  this.maxNegativeP = 0.0003125 * this.temperature**2 + 0.0625*this.temperature;
+  this.maxPositiveP = this.atoms.filter(atom => atom instanceof Indium).length*Math.sqrt(this.temperature);
+  this.maxNegativeN = this.atoms.filter(atom => atom instanceof Arsenicum).length*Math.sqrt(this.temperature);
+  this.maxPositiveN = 2*Math.sqrt(this.temperature);
+  this.maxNegativeP = 2*Math.sqrt(this.temperature);
   
 }
 

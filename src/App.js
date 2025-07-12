@@ -1,29 +1,18 @@
 import React from 'react';
-import './App.css';
-import { Electron } from './components/Electron';
-import  {Atom}  from './components/Atom';
-import { probability } from './utils/helpers';
-import { SimulationCanvas } from './SimulationCanvas';
 import { PNJunction } from './components/PNJunction';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import {AppRenderer} from './AppRenderer';
+import { AppRenderer } from './AppRenderer';
 
 class App extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      acceptorPercent: 5,
-      donorPercent: 5,
+      acceptorPercent: 0,
+      donorPercent: 0,
       particles: [],
-      maxElectrons: 10,
-      currentElectrons: 0,
-      temperature: 50,
+      temperature:0,
       voltage: 0,
-      currentTimeData: [],
-      startTime: Date.now(),
       currentMeasurements: [],
-      lastUpdateTime: 0,
       isRunning: true,
       speedMultiplier: 1,
       averagedMeasurements: [],
@@ -34,7 +23,7 @@ class App extends React.Component {
     this.lastUpdateTime = 0;
     this.updateInterval = 333;
     this.graphUpdateInterval = 3000;
-    this.simulationEngine = new PNJunction(800,480,400);
+    this.simulationEngine = new PNJunction(800, 480, 400);
   }
 
   handleAcceptorChange = (e) => {
@@ -119,8 +108,8 @@ class App extends React.Component {
     const deltaTime = timestamp - this.lastTimestamp;
     this.lastTimestamp = timestamp;
     
-    if(this.state.isRunning)
-      this.simulationEngine.update(deltaTime/10000 * this.state.speedMultiplier);
+    if (this.state.isRunning)
+      this.simulationEngine.update(deltaTime / 10000 * this.state.speedMultiplier);
     const updatedParticles = this.simulationEngine.getAllCircles();
     this.setState({ particles: updatedParticles });
     this.animationFrame = requestAnimationFrame(this.animate);
@@ -141,7 +130,7 @@ class App extends React.Component {
                      this.state.measurementBuffer.length;
       
       this.setState(prevState => {
-        const newTime = prevState.timeCounter + (this.graphUpdateInterval/1000);
+        const newTime = prevState.timeCounter + (this.graphUpdateInterval / 1000);
         return {
           averagedMeasurements: [
             ...prevState.averagedMeasurements,

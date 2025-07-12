@@ -273,7 +273,11 @@ export class AppRenderer extends React.Component {
           />
           <YAxis
             label={{ value: 'Ток (А)', angle: -90, position: 'insideLeft' }}
-            tickFormatter={(current) => current.toFixed(3)}
+            tickFormatter={(current) => {
+              // Убираем лишние нули после точки
+              const formatted = current.toFixed(3);
+              return formatted.replace(/\.?0+$/, '');
+            }}
           />
           <Line 
             type="monotone"
@@ -289,68 +293,94 @@ export class AppRenderer extends React.Component {
     </div>
   );
 }
-
   renderSystemState() {
-    const { simulationEngine } = this.props;
-    
-    return (
-      <div style={{ 
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '10px',
-        fontSize: '14px'
-      }}>
-        <div>
-          <div style={{ color: '#777' }}>Дырок в n-обл (+):</div>
-          <div style={{ fontWeight: 'bold' }}>
-            {simulationEngine.currentPositiveN.toFixed(2)}
+  const { simulationEngine } = this.props;
+  
+  return (
+    <div style={{ 
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: '15px',
+      fontSize: '14px'
+    }}>
+      {/* Текущие значения */}
+      <div>
+        <h4 style={{ 
+          margin: '0 0 10px',
+          color: '#555',
+          borderBottom: '1px solid #ddd',
+          paddingBottom: '5px'
+        }}>
+          Текущие значения
+        </h4>
+        <div style={{ display: 'grid', gap: '8px' }}>
+          <div>
+            <div style={{ color: '#777' }}>Дырок в n-области:</div>
+            <div style={{ fontWeight: 'bold' }}>
+              {simulationEngine.currentPositiveN.toFixed(2)}
+            </div>
           </div>
-        </div>
-        <div>
-          <div style={{ color: '#777' }}>Электронов в n-обл (-):</div>
-          <div style={{ fontWeight: 'bold' }}>
-            {simulationEngine.currentNegativeN.toFixed(2)}
+          <div>
+            <div style={{ color: '#777' }}>Электронов в n-области:</div>
+            <div style={{ fontWeight: 'bold' }}>
+              {simulationEngine.currentNegativeN.toFixed(2)}
+            </div>
           </div>
-        </div>
-        <div>
-          <div style={{ color: '#777' }}>Дырок в p-обл (+):</div>
-          <div style={{ fontWeight: 'bold' }}>
-            {simulationEngine.currentPositiveP.toFixed(2)}
+          <div>
+            <div style={{ color: '#777' }}>Дырок в p-области:</div>
+            <div style={{ fontWeight: 'bold' }}>
+              {simulationEngine.currentPositiveP.toFixed(2)}
+            </div>
           </div>
-        </div>
-        <div>
-          <div style={{ color: '#777' }}>Электронов в p-обл (-):</div>
-          <div style={{ fontWeight: 'bold' }}>
-            {simulationEngine.currentNegativeP.toFixed(2)}
-          </div>
-        </div>
-        <div>
-          <div style={{ color: '#777' }}>Макс. n-область (+):</div>
-          <div style={{ fontWeight: 'bold' }}>
-            {simulationEngine.maxPositiveN.toFixed(2)}
-          </div>
-        </div>
-        <div>
-          <div style={{ color: '#777' }}>Макс. n-область (-):</div>
-          <div style={{ fontWeight: 'bold' }}>
-            {simulationEngine.maxNegativeN.toFixed(2)}
-          </div>
-        </div>
-        <div>
-          <div style={{ color: '#777' }}>Макс. p-область (+):</div>
-          <div style={{ fontWeight: 'bold' }}>
-            {simulationEngine.maxPositiveP.toFixed(2)}
-          </div>
-        </div>
-        <div>
-          <div style={{ color: '#777' }}>Макс. p-область (-):</div>
-          <div style={{ fontWeight: 'bold' }}>
-            {simulationEngine.maxNegativeP.toFixed(2)}
+          <div>
+            <div style={{ color: '#777' }}>Электронов в p-области:</div>
+            <div style={{ fontWeight: 'bold' }}>
+              {simulationEngine.currentNegativeP.toFixed(2)}
+            </div>
           </div>
         </div>
       </div>
-    );
-  }
+      
+      {/* Максимальные значения */}
+      <div>
+        <h4 style={{ 
+          margin: '0 0 10px',
+          color: '#555',
+          borderBottom: '1px solid #ddd',
+          paddingBottom: '5px'
+        }}>
+          Максимальные значения
+        </h4>
+        <div style={{ display: 'grid', gap: '8px' }}>
+          <div>
+            <div style={{ color: '#777' }}>Дырок в n-области:</div>
+            <div style={{ fontWeight: 'bold' }}>
+              {simulationEngine.maxPositiveN.toFixed(2)}
+            </div>
+          </div>
+          <div>
+            <div style={{ color: '#777' }}>Электронов в n-области:</div>
+            <div style={{ fontWeight: 'bold' }}>
+              {simulationEngine.maxNegativeN.toFixed(2)}
+            </div>
+          </div>
+          <div>
+            <div style={{ color: '#777' }}>Дырок в p-области:</div>
+            <div style={{ fontWeight: 'bold' }}>
+              {simulationEngine.maxPositiveP.toFixed(2)}
+            </div>
+          </div>
+          <div>
+            <div style={{ color: '#777' }}>Электронов в p-области:</div>
+            <div style={{ fontWeight: 'bold' }}>
+              {simulationEngine.maxNegativeP.toFixed(2)}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
   renderLegend() {
     return (
