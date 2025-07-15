@@ -1,42 +1,58 @@
+import { PHYSICS_CONSTANTS } from '../config';
 import './Particle.css';
 
 export default class Particle {
+  //Создает новую частицу с заданными параметрами
+
   constructor(x, y, mass, charge, color, radius) {
+    // Позиция частицы
     this.x = x;
     this.y = y;
-    this.nextX = x;
+    this.nextX = x; // Позиция на следующем шаге (для предсказания)
     this.nextY = y;
+    
+    // Физические свойства
     this.mass = mass;
     this.charge = charge;
     this.radius = radius;
-    this.accelX = 0;
-    this.accelY = 0;
-    this.speedX = 0;
-    this.speedY = 0;
+    
+    // Динамические параметры
+    this.accelX = 0;  // Ускорение по X
+    this.accelY = 0;  // Ускорение по Y
+    this.speedX = 0;  // Скорость по X
+    this.speedY = 0;  // Скорость по Y
+    
+    // Визуальные свойства
     this.color = color;
-    this.isAlive = true;
   }
 
-  update(time)
-  {
-
+  //Обновляет состояние частицы с течением времени
+  update(time) {
+    // Применяем трение для постепенного замедления
+    this.speedX *= PHYSICS_CONSTANTS.SPEED_DECAY;
+    this.speedY *= PHYSICS_CONSTANTS.SPEED_DECAY;
   }
 
-  getCoords(){
-    const data = {x: this.x, y: this.y}
-    return data
+  //Возвращает текущие координаты частицы
+  getCoords() {
+    return {x: this.x, y: this.y};
   }
 
-  setCoords(x, y){
+  //Устанавливает новые координаты частицы
+  setCoords(x, y) {
     this.x = x;
     this.y = y;
   }
+
+  //Возвращает символ заряда частицы
 
   getChargeSymbol() {
     if (this.charge > 0) return '+';
     if (this.charge < 0) return '-';
     return ' ';
   }
+
+  //Генерирует стили для визуализации частицы
 
   getDynamicStyles() {
     return {
@@ -45,11 +61,12 @@ export default class Particle {
       width: `${this.radius * 2}px`,
       height: `${this.radius * 2}px`,
       backgroundColor: this.color,
-      fontSize: `30px`, // Размер шрифта пропорционален радиусу
+      fontSize: `${PHYSICS_CONSTANTS.FONT_SIZE_RATIO}px`,
       lineHeight: `2px`, // Центрирование текста по вертикали
     };
   }
 
+  //Рендерит визуальное представление частицы
   render() {
     return (
       <div className="particle" style={this.getDynamicStyles()}>
@@ -58,16 +75,9 @@ export default class Particle {
     );
   }
 
-    // Дополнительный метод для установки скорости
-  setVelocity(vx, vy) {
-    this.speedX = vx;
-    this.speedY = vy;
-  }
-
-  // Дополнительный метод для применения силы (F = ma)
+  //Применяет силу к частице (F = ma)
   applyForce(fx, fy) {
     this.accelX += fx / this.mass;
     this.accelY += fy / this.mass;
   }
-
 }

@@ -220,12 +220,12 @@ export class AppRenderer extends React.Component {
             fontSize: '14px',
             color: '#555'
           }}>
-            Температура: {temperature}°C
+            Температура: {temperature}К
           </label>
           <input
             type="range"
             min="0"
-            max="200"
+            max="400"
             value={temperature}
             onChange={handleTemperatureChange}
             style={{ width: '100%' }}
